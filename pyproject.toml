@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "todo-list"
+version = "0.1.0"
+description = ""
+authors = ["Rinat Ahtyamov <arm.developer@outlook.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = {extras = ["all"], version = "^0.112.2"}
+pydantic-settings = "^2.4.0"
+sqlalchemy = "^2.0.32"
+asyncpg = "^0.29.0"
+alembic = "^1.13.2"
+pydantic = {extras = ["email"], version = "^2.8.2"}
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
