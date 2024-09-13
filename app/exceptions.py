@@ -34,3 +34,20 @@ PasswordsNotMatchException = HTTPException(
     status_code=status.HTTP_409_CONFLICT,
     detail={'code': 'exception', 'msg': 'The passwords do not match.'}
 )
+
+# Categories
+
+CategoryAlreadyExistsException = HTTPException(
+    status_code=status.HTTP_409_CONFLICT,
+    detail={'code': 'exception', 'msg': 'A category with the same name already exists.'}
+)
+
+NotChangedCategoryDoesNotExistException = HTTPException(
+    status_code=status.HTTP_404_NOT_FOUND,
+    detail={'code': 'exception', 'msg': 'Not changed, category does not exist.'}
+)
+
+FailedDeleteCategoryException = HTTPException(
+    status_code=status.HTTP_404_NOT_FOUND,
+    detail={'code': 'exception', 'msg': 'Failed to delete category.'}
+)

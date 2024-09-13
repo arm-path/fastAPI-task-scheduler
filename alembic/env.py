@@ -10,6 +10,7 @@ from alembic import context
 from app.database.settings import Base
 from app.settings import settings
 from app.users import Users
+from app.categories import Categories
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
