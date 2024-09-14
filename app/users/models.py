@@ -7,6 +7,7 @@ from app.database.settings import Base
 
 if TYPE_CHECKING:
     from app.categories.models import Categories
+    from app.tasks.models import Tasks
 
 
 class Users(Base):
@@ -17,6 +18,9 @@ class Users(Base):
     created: Mapped[date] = mapped_column(nullable=False, default=func.current_date())
 
     categories: Mapped[List['Categories']] = relationship(back_populates='user')
+    tasks: Mapped[List['Tasks']] = relationship(back_populates='user',
+                                                cascade='save-update, merge, delete',
+                                                passive_deletes=True)
 
     def __str__(self):
         return f'<User {self.id}: {self.username}/>'

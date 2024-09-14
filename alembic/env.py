@@ -12,6 +12,8 @@ from app.settings import settings
 from app.users import Users
 from app.categories import Categories
 from app.schedulers import Schedulers
+from app.tasks import Tasks
+from app.done_tasks import DoneTasks
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -29,6 +31,7 @@ config.set_main_option('sqlalchemy.url', settings.database.POSTGRES_URL)
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 target_metadata = Base.metadata
+
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

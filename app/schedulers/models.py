@@ -1,7 +1,11 @@
+from typing import List, TYPE_CHECKING
+
 from sqlalchemy import String, ForeignKey, Boolean, UniqueConstraint
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database.settings import Base
 
+if TYPE_CHECKING:
+    from app.tasks.models import Tasks
 
 class Schedulers(Base):
     title: Mapped[str] = mapped_column(String(255), nullable=False)
@@ -13,6 +17,8 @@ class Schedulers(Base):
     friday: Mapped[bool] = mapped_column(Boolean, default=False)
     saturday: Mapped[bool] = mapped_column(Boolean, default=False)
     sunday: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    tasks: Mapped[List['Tasks']] = relationship(back_populates='scheduler')
 
     __table_args__ = (
         UniqueConstraint('user_id', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday',

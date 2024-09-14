@@ -16,7 +16,7 @@ from app.exceptions import (UserAlreadyExistsException,
                             UserAlreadyActivatedException, EmailAddressIsNotRegisteredException,
                             PasswordsNotMatchException)
 from app.settings import settings
-from app.tasks.users import send_mail_recovery_password, send_mail_email_confirmation
+from app.tasks_celery.users import send_mail_recovery_password, send_mail_email_confirmation
 from app.users.models import Users
 from app.users.schemas import RegistrationSchema, AuthenticationSchema, JWTPyloadSchema
 from app.users.utils import (get_hash_password, verify_password, create_access_jwt_token, get_access_token,
