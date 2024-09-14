@@ -51,3 +51,14 @@ FailedDeleteCategoryException = HTTPException(
     status_code=status.HTTP_404_NOT_FOUND,
     detail={'code': 'exception', 'msg': 'Failed to delete category.'}
 )
+
+# Schedulers
+ScheduleAlreadyExistsException = HTTPException(
+    status_code=status.HTTP_409_CONFLICT,
+    detail={'code': 'exception', 'msg': 'A schedule with these days of the week already exists.'}
+)
+
+ScheduleNotFoundException = HTTPException(
+    status_code=status.HTTP_404_NOT_FOUND,
+    detail={'code': 'exception', 'msg': 'Schedule not found.'}
+)
