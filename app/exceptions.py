@@ -1,5 +1,23 @@
 from fastapi import HTTPException, status
 
+# Base
+UnhandledException = HTTPException(
+    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+    detail={'code': 'fatal', 'msg': 'A server error occurred.'}
+)
+
+ForeignKeyDoesNotExistException = lambda msg: HTTPException(
+    status_code=status.HTTP_409_CONFLICT,
+    detail={'code': 'exception', 'msg': msg}
+)
+
+NotUniqueValueException = lambda msg: HTTPException(
+    status_code=status.HTTP_409_CONFLICT,
+    detail={'code': 'exception', 'msg': msg}
+)
+
+# Users
+
 UserAlreadyExistsException = HTTPException(
     status_code=status.HTTP_409_CONFLICT,
     detail={'code': 'exception', 'msg': 'User already exists.'}

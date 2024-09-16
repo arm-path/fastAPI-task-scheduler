@@ -1,5 +1,7 @@
 __all__ = (
-    'Tasks'
+    'Tasks',
+    'router'
 )
 
 from app.tasks.models import Tasks
+from app.tasks.routers import router
