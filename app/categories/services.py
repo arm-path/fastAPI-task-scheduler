@@ -1,3 +1,4 @@
+from asyncpg import UniqueViolationError
 from fastapi_pagination.ext.sqlalchemy import paginate
 from sqlalchemy import Select, select, Result, Insert, insert, Update, update, Delete, delete
 from sqlalchemy.exc import IntegrityError
@@ -5,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.categories import Categories
 from app.exceptions import (CategoryAlreadyExistsException, NotChangedCategoryDoesNotExistException,
-                            FailedDeleteCategoryException)
+                            FailedDeleteCategoryException, UnhandledException)
 from app.users.schemas import UserReadSchema
 
 
@@ -31,8 +32,10 @@ class CategoryService:
             category_result: Result[tuple[Categories]] = await session.execute(query)
             await session.commit()
             category_db: Categories = category_result.scalar_one_or_none()
-        except IntegrityError:
-            raise CategoryAlreadyExistsException
+        except IntegrityError as err:
+            if err.orig.__cause__.__class__ == UniqueViolationError:
+                raise CategoryAlreadyExistsException
+            raise UnhandledException
         return category_db
 
     @classmethod
@@ -43,8 +46,10 @@ class CategoryService:
             )
             category_result: Result[tuple[Categories]] = await session.execute(query)
             await session.commit()
-        except IntegrityError:
-            raise CategoryAlreadyExistsException
+        except IntegrityError as err:
+            if err.orig.__cause__.__class__ == UniqueViolationError:
+                raise CategoryAlreadyExistsException
+            raise UnhandledException
         category_db: Categories | None = category_result.scalar_one_or_none()
         if not category_db:
             raise NotChangedCategoryDoesNotExistException

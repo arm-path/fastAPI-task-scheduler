@@ -16,6 +16,11 @@ NotUniqueValueException = lambda msg: HTTPException(
     detail={'code': 'exception', 'msg': msg}
 )
 
+ObjectNotFoundException = HTTPException(
+    status_code=status.HTTP_404_NOT_FOUND,
+    detail={'code': 'exception', 'msg': 'Object not found.'}
+)
+
 # Users
 
 UserAlreadyExistsException = HTTPException(
@@ -80,3 +85,26 @@ ScheduleNotFoundException = HTTPException(
     status_code=status.HTTP_404_NOT_FOUND,
     detail={'code': 'exception', 'msg': 'Schedule not found.'}
 )
+
+# Done Task
+
+InvalidTaskIdException = HTTPException(
+    status_code=status.HTTP_409_CONFLICT,
+    detail={'code': 'exception', 'msg': 'Invalid task_id.'}
+)
+
+NotAccordingToScheduleException = HTTPException(
+    status_code=status.HTTP_409_CONFLICT,
+    detail={'code': 'exception', 'msg': 'Not according to schedule.'}
+)
+
+QuantityCannotNegativeException = HTTPException(
+    status_code=status.HTTP_409_CONFLICT,
+    detail={'code': 'exception', 'msg': 'Quantity cannot be negative.'}
+)
+
+DoneTaskAlreadyExistsException = HTTPException(
+    status_code=status.HTTP_409_CONFLICT,
+    detail={'code': 'exception', 'msg': 'The task already exists.'}
+)
+

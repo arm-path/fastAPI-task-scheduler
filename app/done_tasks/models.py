@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import ForeignKey, Integer, Date, Boolean, text
+from sqlalchemy import ForeignKey, Integer, Date, Boolean, text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.settings import Base
@@ -17,6 +17,8 @@ class DoneTasks(Base):
     updated: Mapped[datetime] = mapped_column(server_default=text("TIMEZONE('utc', now())"), onupdate=datetime.utcnow)
 
     task: Mapped['Tasks'] = relationship(back_populates='done_tasks')
+
+    __table_args__ = (UniqueConstraint('task_id', 'date', name='uq_task_id_date'),)
 
     def __str__(self):
         return f'<DoneTasks {self.id}: {self.task_id}-{self.date}/>'
