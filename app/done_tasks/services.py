@@ -1,15 +1,19 @@
+from datetime import date, timedelta
+from typing import List
+
 from asyncpg import UniqueViolationError
 from sqlalchemy import Select, select, Result, Insert, insert, Update, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import selectinload, joinedload
 
 from app.done_tasks import DoneTasks
 from app.exceptions import (InvalidTaskIdException,
                             NotAccordingToScheduleException,
                             QuantityCannotNegativeException,
                             UnhandledException,
-                            DoneTaskAlreadyExistsException, ObjectNotFoundException
+                            DoneTaskAlreadyExistsException, ObjectNotFoundException, DatesIncorrectException,
+                            NotTasksFoundByDateException
                             )
 from app.tasks import Tasks
 from app.users.schemas import UserReadSchema
@@ -101,3 +105,49 @@ class DoneTaskService:
             raise ObjectNotFoundException
 
         return done_task_db
+
+    @classmethod
+    async def get_tasks(cls, session: AsyncSession, user: UserReadSchema, date_start: date, date_end: date):
+        if date_start > date_end:
+            raise DatesIncorrectException
+
+        query_tasks: Select = (
+            select(Tasks)
+            .where(Tasks.user_id == user.id, Tasks.end_date > date_start, Tasks.start_date < date_end)
+            .options(joinedload(Tasks.scheduler))
+        )
+        tasks_result: Result[tuple[Tasks]] = await session.execute(query_tasks)
+        tasks_db = tasks_result.scalars().all()
+        if not tasks_db:
+            raise NotTasksFoundByDateException(date_start, date_end)
+
+        allowed_tasks_ids: List[int] = [el.id for el in tasks_db]
+
+        query_done_tasks: Select = (
+            select(cls.model)
+            .where(cls.model.id.in_(allowed_tasks_ids),
+                   cls.model.date > date_start, cls.model.date < date_end)
+        )
+        done_tasks_result: Result[tuple[DoneTasks]] = await session.execute(query_done_tasks)
+        done_tasks_db = done_tasks_result.scalars().all()
+
+        current_date: date = date_start
+        tasks = {}
+        while current_date <= date_end:
+            day_week: str = current_date.strftime("%A").lower()
+            tasks_in_date = []
+            tasks[current_date] = tasks_in_date
+            for task in tasks_db:
+                allowed_day: bool = task.scheduler.__dict__.get(day_week)
+                if allowed_day:
+                    tasks_in_date.append({'task': task, 'done': {}})
+            tasks[current_date] = tasks_in_date
+            current_date += timedelta(days=1)
+
+        for done_task in done_tasks_db:
+            find_task = tasks.get(done_task.date)
+            if find_task:
+                for el in tasks[done_task.date]:
+                    if el['task'].id == done_task.id:
+                        el['done'] = done_task.__dict__
+        return tasks

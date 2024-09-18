@@ -1,9 +1,11 @@
+from datetime import date
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.settings import db_settings
+from app.done_tasks import DoneTasks
 from app.done_tasks.schemas import CrateDoneTaskSchema, UpdateDoneTaskSchema
 from app.done_tasks.services import DoneTaskService
 from app.users.schemas import UserReadSchema
@@ -35,3 +37,9 @@ async def detail(session: Annotated[AsyncSession, Depends(db_settings.get_sessio
                  user: Annotated[UserReadSchema, Depends(UserService.get_current_user)],
                  done_task_id: int):
     return await DoneTaskService.detail(session, user, done_task_id)
+
+@router.get('/list/tasks/')
+async def scheduler_tasks(session: Annotated[AsyncSession, Depends(db_settings.get_session)],
+                          user: Annotated[UserReadSchema, Depends(UserService.get_current_user)],
+                          date_start: date, date_end: date):
+    return await DoneTaskService.get_tasks(session, user, date_start, date_end)

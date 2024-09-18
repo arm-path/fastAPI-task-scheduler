@@ -1,3 +1,5 @@
+from logging import exception
+
 from fastapi import HTTPException, status
 
 # Base
@@ -108,3 +110,12 @@ DoneTaskAlreadyExistsException = HTTPException(
     detail={'code': 'exception', 'msg': 'The task already exists.'}
 )
 
+DatesIncorrectException = HTTPException(
+    status_code=status.HTTP_409_CONFLICT,
+    detail={'code': 'exception', 'msg': 'The dates are incorrect.'}
+)
+
+NotTasksFoundByDateException = lambda date_start, date_end: HTTPException(
+    status_code=status.HTTP_404_NOT_FOUND,
+    detail={'code': 'info', 'msg': f'No tasks found by date: {date_start} to {date_end}'}
+)
