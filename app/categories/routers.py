@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, status
 from fastapi_pagination import Page
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -19,34 +19,33 @@ router = APIRouter(
 @router.get('/list/', response_model=Page[CategoryListSchema])
 async def get_list(user: Annotated[UserReadSchema, Depends(UserService.get_current_user)],
                    session: Annotated[AsyncSession, Depends(db_settings.get_session)]):
-    categories = await CategoryService.get_list(session, user)
-    return categories
+    return await CategoryService.get_list(session, is_paginate=True, user_id=user.id)
 
 
 @router.get('/detail/{category_id}/', response_model=CategoryDetailSchema)
 async def get_detail(user: Annotated[UserReadSchema, Depends(UserService.get_current_user)],
                      session: Annotated[AsyncSession, Depends(db_settings.get_session)],
                      category_id: int):
-    return await CategoryService.get_detail(session, user, category_id)
+    return await CategoryService.get_detail(session, model_id=category_id, user_id=user.id)
 
 
 @router.post('/create/', response_model=CategoryDetailSchema)
 async def create(user: Annotated[UserReadSchema, Depends(UserService.get_current_user)],
                  session: Annotated[AsyncSession, Depends(db_settings.get_session)],
                  data: CategoryCreateUpdateSchema):
-    return await CategoryService.create(session, user, title=data.title)
+    return await CategoryService.create_category(session, user, data)
 
 
-@router.put('/edit/{category_id}/')
+@router.put('/edit/{category_id}/', response_model=CategoryDetailSchema)
 async def edit(user: Annotated[UserReadSchema, Depends(UserService.get_current_user)],
                session: Annotated[AsyncSession, Depends(db_settings.get_session)],
                category_id: int,
                data: CategoryCreateUpdateSchema):
-    return await CategoryService.update(session, user, category_id, data.title)
+    return await CategoryService.update_category(session, user, category_id, data)
 
 
-@router.delete('/delete/{category_id}/')
+@router.delete('/delete/{category_id}/', status_code=status.HTTP_204_NO_CONTENT)
 async def delete(user: Annotated[UserReadSchema, Depends(UserService.get_current_user)],
                  session: Annotated[AsyncSession, Depends(db_settings.get_session)],
                  category_id: int):
-    await CategoryService.delete(session, user, category_id)
+    await CategoryService.delete_category(session, user, category_id)

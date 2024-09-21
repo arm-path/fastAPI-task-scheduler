@@ -8,6 +8,11 @@ UnhandledException = HTTPException(
     detail={'code': 'fatal', 'msg': 'A server error occurred.'}
 )
 
+DatabaseQueryErrorException = HTTPException(
+    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+    detail={'code': 'fatal', 'msg': 'Database query error.'}
+)
+
 ForeignKeyDoesNotExistException = lambda msg: HTTPException(
     status_code=status.HTTP_409_CONFLICT,
     detail={'code': 'exception', 'msg': msg}
@@ -18,10 +23,21 @@ NotUniqueValueException = lambda msg: HTTPException(
     detail={'code': 'exception', 'msg': msg}
 )
 
+ForeignKeyDoesNotExistBaseException = HTTPException(
+    status_code=status.HTTP_409_CONFLICT,
+    detail={'code': 'exception', 'msg': 'Violation of Foreign key field.'}
+)
+
+NotUniqueValueBaseException = HTTPException(
+    status_code=status.HTTP_409_CONFLICT,
+    detail={'code': 'exception', 'msg': 'Violation of unique field.'}
+)
+
 ObjectNotFoundException = HTTPException(
     status_code=status.HTTP_404_NOT_FOUND,
     detail={'code': 'exception', 'msg': 'Object not found.'}
 )
+
 
 # Users
 

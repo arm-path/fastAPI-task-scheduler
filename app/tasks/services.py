@@ -4,7 +4,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload, selectinload
 
-from app.base.exceptions import integrity_error_handling
+from app.database.exceptions import integrity_error_handling
 from app.exceptions import UnhandledException
 from app.tasks import Tasks
 from app.users.schemas import UserReadSchema

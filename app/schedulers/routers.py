@@ -19,32 +19,32 @@ router = APIRouter(
 @router.get('/list/', response_model=Page[SchedulerListSchema])
 async def get_list(user: Annotated[UserReadSchema, Depends(UserService.get_current_user)],
                    session: Annotated[AsyncSession, Depends(db_settings.get_session)]):
-    return await SchedulerService.get_list(session, user)
+    return await SchedulerService.get_list(session, user_id=user.id, is_paginate=True)
 
 
 @router.get('/detail/{scheduler_id}', response_model=SchedulerDetailSchema)
 async def get_detail(user: Annotated[UserReadSchema, Depends(UserService.get_current_user)],
                      session: Annotated[AsyncSession, Depends(db_settings.get_session)],
                      scheduler_id: int):
-    return await SchedulerService.get_detail(session, user, scheduler_id)
+    return await SchedulerService.get_detail(session, model_id=scheduler_id, user_id=user.id)
 
 
 @router.post('/create/', response_model=SchedulerDetailSchema)
 async def create(user: Annotated[UserReadSchema, Depends(UserService.get_current_user)],
                  session: Annotated[AsyncSession, Depends(db_settings.get_session)],
                  data: SchedulerCreateUpdateSchema):
-    return await SchedulerService.create(session, user, **data.model_dump())
+    return await SchedulerService.create_scheduler(session, user, data)
 
 
 @router.put('/update/{scheduler_id}', response_model=SchedulerDetailSchema)
 async def update(user: Annotated[UserReadSchema, Depends(UserService.get_current_user)],
                  session: Annotated[AsyncSession, Depends(db_settings.get_session)],
                  data: SchedulerCreateUpdateSchema, scheduler_id: int):
-    return await SchedulerService.update(session, user, scheduler_id, **data.model_dump())
+    return await SchedulerService.update_scheduler(session, user, scheduler_id, data)
 
 
 @router.delete('/delete/{scheduler_id}/')
 async def delete(user: Annotated[UserReadSchema, Depends(UserService.get_current_user)],
                  session: Annotated[AsyncSession, Depends(db_settings.get_session)],
-                 scheduler_id):
-    await SchedulerService.delete(session, user, scheduler_id)
+                 scheduler_id:int):
+    await SchedulerService.delete_scheduler(session, user, scheduler_id)
