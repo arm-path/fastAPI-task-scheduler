@@ -20,10 +20,12 @@ class TaskBaseCreateSchema(TaskBaseSchema):
 
 
 class TaskListSchema(TaskBaseSchema):
+    id: int
     category: CategoryListSchema
 
 
 class TaskDetailSchema(TaskListSchema):
+    id: int
     scheduler: SchedulerDetailSchema
     created: datetime
     updated: datetime

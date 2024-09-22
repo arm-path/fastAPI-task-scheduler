@@ -19,21 +19,21 @@ router = APIRouter(
 @router.get('/list/', response_model=Page[TaskListSchema])
 async def get_list(session: Annotated[AsyncSession, Depends(db_settings.get_session)],
                    user: Annotated[UserReadSchema, Depends(UserService.get_current_user)]):
-    return await TaskService.get_list(session, user)
+    return await TaskService.task_list(session, user)
 
 
 @router.get('/detail/{task_id}/', response_model=TaskDetailSchema)
 async def get_detail(session: Annotated[AsyncSession, Depends(db_settings.get_session)],
                      user: Annotated[UserReadSchema, Depends(UserService.get_current_user)],
                      task_id: int):
-    return await TaskService.get_detail(session, user, task_id)
+    return await TaskService.task_detail(session, user, task_id)
 
 
 @router.post('/create/', response_model=TaskDetailSchema)
 async def create(session: Annotated[AsyncSession, Depends(db_settings.get_session)],
                  user: Annotated[UserReadSchema, Depends(UserService.get_current_user)],
                  data: TaskBaseCreateSchema):
-    return await TaskService.create(session, user, **data.model_dump())
+    return await TaskService.task_create(session, user, data)
 
 
 @router.put('/update/{task_id}/', response_model=TaskDetailSchema)
@@ -41,11 +41,11 @@ async def update(session: Annotated[AsyncSession, Depends(db_settings.get_sessio
                  user: Annotated[UserReadSchema, Depends(UserService.get_current_user)],
                  task_id: int,
                  data: TaskBaseCreateSchema):
-    return await TaskService.update(session, user, task_id, **data.model_dump())
+    return await TaskService.task_update(session, user, task_id, data)
 
 
 @router.delete('/delete/{task_id}')
 async def delete(session: Annotated[AsyncSession, Depends(db_settings.get_session)],
                  user: Annotated[UserReadSchema, Depends(UserService.get_current_user)],
                  task_id: int):
-    await TaskService.delete(session, user, task_id)
+    await TaskService.task_delete(session, user, task_id)

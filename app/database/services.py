@@ -13,10 +13,11 @@ class DatabaseService:
     model = None
 
     @classmethod
-    async def get_list(cls, session: AsyncSession, is_paginate: bool = False, **filters):
+    async def get_list(cls, session: AsyncSession, is_paginate: bool = False, options: list = [], **filters):
         query: Select = (
             select(cls.model)
             .filter_by(**filters)
+            .options(*options)
         )
         if is_paginate:
             return await paginate(session, query)
@@ -25,12 +26,18 @@ class DatabaseService:
         return data
 
     @classmethod
-    async def get_detail(cls, session: AsyncSession, model_id: int, **filters):
-        query: Select = (
-            select(cls.model)
-            .filter_by(id=model_id, **filters)
-        )
-        result: Result[tuple[cls.model]] = await session.execute(query)
+    async def get_detail(cls, session: AsyncSession, model_id: int, options: list = [], **filters):
+        try:
+            query: Select = (
+                select(cls.model)
+                .filter_by(id=model_id, **filters)
+                .options(*options)
+            )
+            result: Result[tuple[cls.model]] = await session.execute(query)
+        except InvalidRequestError as err:
+            raise DatabaseQueryErrorException
+        except Exception as err:
+            raise UnhandledException
         data: cls.model = result.scalar_one_or_none()
         if not data:
             raise ObjectNotFoundException
@@ -40,12 +47,14 @@ class DatabaseService:
     async def create(cls,
                      session: AsyncSession,
                      exceptions: ExceptionsDatabase = ExceptionsDatabase(),
+                     options: list = [],
                      **values):
         try:
             stmt: Insert = (
                 insert(cls.model)
                 .values(**values)
                 .returning(cls.model)
+                .options(*options)
             )
             result: Result[cls.model] = await session.execute(stmt)
             await session.commit()
@@ -62,6 +71,7 @@ class DatabaseService:
                      session: AsyncSession,
                      filters: dict,
                      exceptions: ExceptionsDatabase = ExceptionsDatabase(),
+                     options: list = [],
                      **values):
         try:
             stmt: Update = (
@@ -69,6 +79,7 @@ class DatabaseService:
                 .filter_by(**filters)
                 .values(**values)
                 .returning(cls.model)
+                .options(*options)
             )
             result: Result[cls.model] = await session.execute(stmt)
             await session.commit()
