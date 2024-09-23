@@ -26,7 +26,7 @@ async def get_list(user: Annotated[UserReadSchema, Depends(UserService.get_curre
 async def get_detail(user: Annotated[UserReadSchema, Depends(UserService.get_current_user)],
                      session: Annotated[AsyncSession, Depends(db_settings.get_session)],
                      scheduler_id: int):
-    return await SchedulerService.get_detail(session, model_id=scheduler_id, user_id=user.id)
+    return await SchedulerService.get_detail(session, id=scheduler_id, user_id=user.id)
 
 
 @router.post('/create/', response_model=SchedulerDetailSchema)

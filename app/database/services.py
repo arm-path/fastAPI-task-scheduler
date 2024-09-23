@@ -26,11 +26,11 @@ class DatabaseService:
         return data
 
     @classmethod
-    async def get_detail(cls, session: AsyncSession, model_id: int, options: list = [], **filters):
+    async def get_detail(cls, session: AsyncSession, options: list = [], is_none=False, **filters):
         try:
             query: Select = (
                 select(cls.model)
-                .filter_by(id=model_id, **filters)
+                .filter_by(**filters)
                 .options(*options)
             )
             result: Result[tuple[cls.model]] = await session.execute(query)
@@ -39,7 +39,7 @@ class DatabaseService:
         except Exception as err:
             raise UnhandledException
         data: cls.model = result.scalar_one_or_none()
-        if not data:
+        if not data and not is_none:
             raise ObjectNotFoundException
         return data
 

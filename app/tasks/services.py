@@ -18,7 +18,7 @@ class TaskService(DatabaseService):
     @classmethod
     async def task_detail(cls, session: AsyncSession, user: UserReadSchema, task_id):
         options = [selectinload(cls.model.category), selectinload(cls.model.scheduler)]
-        return await cls.get_detail(session, options=options, user_id=user.id, model_id=task_id)
+        return await cls.get_detail(session, options=options, user_id=user.id, id=task_id)
 
     @classmethod
     async def task_create(cls, session: AsyncSession, user: UserReadSchema, data: TaskBaseCreateSchema):

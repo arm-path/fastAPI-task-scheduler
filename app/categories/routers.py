@@ -26,7 +26,7 @@ async def get_list(user: Annotated[UserReadSchema, Depends(UserService.get_curre
 async def get_detail(user: Annotated[UserReadSchema, Depends(UserService.get_current_user)],
                      session: Annotated[AsyncSession, Depends(db_settings.get_session)],
                      category_id: int):
-    return await CategoryService.get_detail(session, model_id=category_id, user_id=user.id)
+    return await CategoryService.get_detail(session, id=category_id, user_id=user.id)
 
 
 @router.post('/create/', response_model=CategoryDetailSchema)
