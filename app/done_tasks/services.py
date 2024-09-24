@@ -76,6 +76,7 @@ class DoneTaskService(DatabaseService):
                         user: UserReadSchema,
                         task_id: int,
                         category_id: int,
+                        is_done: bool,
                         date_start: date,
                         date_end: date):
         query_task_filter = [Tasks.user_id == user.id]
@@ -118,7 +119,6 @@ class DoneTaskService(DatabaseService):
         )
         tasks_result: Result[tuple[Tasks]] = await session.execute(query_tasks)
         tasks_db = tasks_result.scalars().all()
-        print(tasks_db)
         if not tasks_db:
             raise NotTasksFoundByDateException(*not_task_found_args)
 
@@ -153,5 +153,21 @@ class DoneTaskService(DatabaseService):
                 for el in tasks[done_task.date]:
                     if el['task'].id == done_task.task_id:
                         el['done'] = done_task.__dict__
-
+        is_done_tasks = tasks.copy()
+        if is_done:
+            tasks = {}
+            for key, items in is_done_tasks.items():
+                tasks_in_date = []
+                for item in items:
+                    if item['done'].get('is_done'):
+                        tasks_in_date.append(item)
+                        tasks[key] = tasks_in_date
+        if not is_done and not is_done is None:
+            tasks = {}
+            for key, items in is_done_tasks.items():
+                tasks_in_date = []
+                for item in items:
+                    if not item['done'].get('is_done'):
+                        tasks_in_date.append(item)
+                        tasks[key] = tasks_in_date
         return tasks
