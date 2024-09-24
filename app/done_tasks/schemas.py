@@ -2,6 +2,7 @@ from datetime import date, datetime
 
 from pydantic import BaseModel
 
+from app.categories.schemas import CategoryDetailSchema
 from app.tasks.schemas import TaskDetailSchema
 
 
@@ -26,12 +27,12 @@ class DoneTaskSchedulerSchema(BaseModel):
     date: date
     quantity: int
     is_done: bool
-    # updated: datetime
 
 
 class TaskSchedulerSchema(BaseModel):
     id: int
     title: str
+    category: CategoryDetailSchema
     start_date: date
     end_date: date
     quantity: int

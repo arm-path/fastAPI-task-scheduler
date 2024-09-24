@@ -33,6 +33,5 @@ async def detail(session: Annotated[AsyncSession, Depends(db_settings.get_sessio
 @router.get('/list/tasks/', response_model=Dict[date, List[DoneTasksListSchema]])
 async def scheduler_tasks(session: Annotated[AsyncSession, Depends(db_settings.get_session)],
                           user: Annotated[UserReadSchema, Depends(UserService.get_current_user)],
-                          date_start: date, date_end: date):
+                          date_start: date = None, date_end: date = None):
     return await DoneTaskService.get_tasks(session, user, date_start, date_end)
-# response_model=dict[date, list[DoneTasksListSchema]]
