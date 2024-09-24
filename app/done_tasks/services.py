@@ -1,7 +1,6 @@
 from datetime import date, timedelta
 from typing import List
 
-from dns.e164 import query
 from sqlalchemy import Select, select, Result
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload, joinedload
@@ -73,20 +72,32 @@ class DoneTaskService(DatabaseService):
         return done_task
 
     @classmethod
-    async def get_tasks(cls, session: AsyncSession, user: UserReadSchema, date_start: date, date_end: date):
+    async def get_tasks(cls, session: AsyncSession,
+                        user: UserReadSchema,
+                        task_id: int,
+                        category_id: int,
+                        date_start: date,
+                        date_end: date):
         query_task_filter = [Tasks.user_id == user.id]
         query_done_task_filter = []
+
+        if task_id:
+            query_task_filter.append(Tasks.id == task_id)
+        if category_id:
+            query_task_filter.append(Tasks.category_id == category_id)
+
         not_task_found_args = [date_start, date_end]
         current_date = date.today()
         if date_start and date_end:
             if date_start > date_end:
                 raise DatesIncorrectException
-            not_task_found_args = []
+            not_task_found_args = [date_start, date_end]
             query_task_filter.extend([Tasks.end_date > date_start, Tasks.start_date < date_end])
             query_done_task_filter = [cls.model.date >= date_start, cls.model.date <= date_end]
         if date_start and not date_end:
             not_task_found_args = [date_start, date_start]
-            query_task_filter.extend([Tasks.user_id == user.id, Tasks.start_date < date_start, Tasks.end_date > date_start])
+            query_task_filter.extend(
+                [Tasks.user_id == user.id, Tasks.start_date < date_start, Tasks.end_date > date_start])
             query_done_task_filter = [cls.model.date == date_start]
             current_date = date_start
         if not date_start and date_end:
@@ -96,7 +107,8 @@ class DoneTaskService(DatabaseService):
             current_date = date_end
         if not date_start and not date_end:
             not_task_found_args = [date.today(), date.today()]
-            query_task_filter = [Tasks.user_id == user.id, Tasks.start_date < date.today(), Tasks.end_date > date.today()]
+            query_task_filter = [Tasks.user_id == user.id, Tasks.start_date < date.today(),
+                                 Tasks.end_date > date.today()]
             query_done_task_filter = [cls.model.date == date.today()]
 
         query_tasks: Select = (
@@ -106,7 +118,7 @@ class DoneTaskService(DatabaseService):
         )
         tasks_result: Result[tuple[Tasks]] = await session.execute(query_tasks)
         tasks_db = tasks_result.scalars().all()
-
+        print(tasks_db)
         if not tasks_db:
             raise NotTasksFoundByDateException(*not_task_found_args)
 
