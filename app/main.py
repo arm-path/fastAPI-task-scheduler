@@ -7,6 +7,7 @@ from app.categories import router as category_router
 from app.schedulers import router as scheduler_router
 from app.tasks import router as task_router
 from app.done_tasks import router as done_tasks_router
+from app.reports import router as report_router
 
 app = FastAPI()
 
@@ -15,6 +16,7 @@ app.include_router(category_router)
 app.include_router(scheduler_router)
 app.include_router(task_router)
 app.include_router(done_tasks_router)
+app.include_router(report_router)
 app.include_router(mail_router)
 
 add_pagination(app)

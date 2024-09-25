@@ -38,7 +38,6 @@ ObjectNotFoundException = HTTPException(
     detail={'code': 'exception', 'msg': 'Object not found.'}
 )
 
-
 # Users
 
 UserAlreadyExistsException = HTTPException(
@@ -135,3 +134,10 @@ NotTasksFoundByDateException = lambda date_start, date_end: HTTPException(
     status_code=status.HTTP_404_NOT_FOUND,
     detail={'code': 'info', 'msg': f'No tasks found by date: {date_start} to {date_end}'}
 )
+
+# Reports
+ParamDatesMustBeDefinedException = HTTPException(
+    status_code=status.HTTP_409_CONFLICT,
+    detail={'code': 'exception', 'msg': 'date_from and date_to must be defined'}
+)
+
