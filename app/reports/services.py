@@ -1,7 +1,8 @@
 from datetime import date, timedelta
 
-from sqlalchemy import Select, select, Result, func
+from sqlalchemy import Select, select, Result, func, or_, and_
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload
 
 from app.database.services import DatabaseService
 from app.done_tasks import DoneTasks
@@ -54,4 +55,46 @@ class ReportServices(DatabaseService):
 
     @classmethod
     async def percentage_tasks_completed(cls, session: AsyncSession, user: UserReadSchema):
-        pass
+        today = date.today()
+        date_from = today.replace(day=1)
+        if today.month == 12:
+            date_to = today.replace(year=today.year + 1, month=1, day=1) - timedelta(days=1)
+        else:
+            date_to = today.replace(month=today.month + 1, day=1) - timedelta(days=1)
+        query: Select = (
+            select(Tasks)
+            .where(and_(Tasks.user_id == user.id,
+                        or_(and_(Tasks.start_date >= date_from, Tasks.start_date <= date_to),
+                            and_(Tasks.start_date <= date_from, Tasks.end_date > date_from))))
+            .options(joinedload(Tasks.scheduler))
+        )
+        query_result: Result[tuple[Tasks]] = await session.execute(query)
+        task_db = query_result.scalars().all()
+
+        tasks_needs_done = []
+        for task in task_db:
+            task_needs_done = {'title': task.title}
+            required_days = 0
+            task_date_from = max(task.start_date, date_from)
+            task_date_to = min(task.end_date, date_to)
+            while task_date_from <= task_date_to:
+                day_week: str = task_date_from.strftime("%A").lower()
+                allowed_day: bool = task.scheduler.__dict__.get(day_week)
+                if allowed_day:
+                    required_days += 1
+                task_date_from += timedelta(days=1)
+            task_needs_done['needs_done'] = required_days
+            tasks_needs_done.append(task_needs_done)
+
+        tasks_done = await cls.base_report(session, user, None, None)
+        results = []
+        for task_need_done in tasks_needs_done:
+            task = task_need_done.copy()
+            task['done'] = 0
+            for title, key in tasks_done.items():
+                if task_need_done.get('title') == title:
+                    task['done'] = key
+            task['percent_done'] = round(task['done'] / task['needs_done'] * 100, 2)
+            results.append(task)
+
+        return results
