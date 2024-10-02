@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic import BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -53,6 +55,12 @@ class EmailSettings(BaseModel):
 
 
 class Settings(BaseSettings):
+    VERSION: Literal['TEST', 'DEV', 'PROD']
+    POSTGRES_HOST: str
+    POSTGRES_PORT: str
+    POSTGRES_USER: str
+    POSTGRES_PASSWORD: str
+    POSTGRES_DB: str
     site: SiteSettings
     database: DatabasePGSettings
     security: SecuritySettings
@@ -61,6 +69,10 @@ class Settings(BaseSettings):
                                       env_nested_delimiter="__",
                                       case_sensitive=False
                                       )
+
+    @property
+    def POSTGRES_URL(self):
+        return f'postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}/{self.POSTGRES_DB}'
 
 
 settings = Settings()

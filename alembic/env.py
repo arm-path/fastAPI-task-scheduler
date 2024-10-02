@@ -23,8 +23,8 @@ config = context.config
 # This line sets up loggers basically.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
-
-config.set_main_option('sqlalchemy.url', settings.database.POSTGRES_URL)
+postgres_url = settings.POSTGRES_URL if settings.VERSION == 'PROD' else settings.database.POSTGRES_URL
+config.set_main_option('sqlalchemy.url', settings.POSTGRES_URL)
 
 # add your model's MetaData object here
 # for 'autogenerate' support

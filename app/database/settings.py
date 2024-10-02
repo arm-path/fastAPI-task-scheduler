@@ -10,7 +10,9 @@ from app.utils import camel_case_to_snake_case
 
 class DatabaseSettings:
     def __init__(self, echo=settings.database.ENGINE_ECHO):
-        self.engine = create_async_engine(settings.database.POSTGRES_URL, echo=echo)
+        self.engine = create_async_engine(
+            settings.POSTGRES_URL if settings.VERSION == 'PROD' else settings.database.POSTGRES_URL, echo=echo
+        )
         self.session = async_sessionmaker(self.engine, expire_on_commit=False, autoflush=False)
 
     async def get_session(self) -> AsyncGenerator[AsyncSession, None]:
